@@ -1,3 +1,209 @@
-{
-	"folders": []
-}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>나만의 모바일 신분증</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@500&display=swap">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'IBM Plex Sans KR', sans-serif;
+    }
+    body {
+      margin: 0;
+      background-color: #f4f8fb;
+      color: #333;
+    }
+    #loading-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background-color: rgba(191, 227, 253, 1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .header {
+      background: #0066cc;
+      color: white;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header img {
+      height: 40px;
+    }
+    .box_main {
+      background: white;
+      max-width: 400px;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h1, h2, h3 {
+      margin: 10px 0;
+      word-wrap: break-word;
+    }
+    .QR_Code img {
+      width: 100px;
+    }
+    progress {
+      width: 100%;
+      height: 10px;
+    }
+    .progressbar_time {
+      text-align: right;
+      font-size: 12pt;
+    }
+    .box_footer {
+      margin-top: 15px;
+      color: #0077cc;
+      cursor: pointer;
+    }
+    .modal {
+      display: none;
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 400px;
+      margin: 20px auto;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .switch_label {
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+      background: #ccc;
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+    }
+    .switch_label .onf_btn {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: white;
+      top: 1px;
+      left: 1px;
+      transition: 0.3s;
+    }
+    input:checked + .switch_label .onf_btn {
+      transform: translateX(26px);
+      background: #4caf50;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 로딩 화면 -->
+<div id="loading-screen">
+  <img src="loading-image.jpg" alt="로딩 중...">
+</div>
+
+<!-- 상단 헤더 -->
+<div class="header">
+  <img src="mark.png" alt="로고">
+  <div>
+    <h2 style="font-size: 18px;">모바일 신분증</h2>
+    <p style="font-size: 13px;">나만의 확인 시스템</p>
+  </div>
+</div>
+
+<!-- 본문 박스 -->
+<div id="wrap">
+  <div id="box" class="box_main">
+    <img src="facephoto.jpg" alt="증명사진" style="width:140px; height:175px;">
+    <h1>최준영</h1>
+    <h3>부산광역시 북구</h3>
+
+    <div class="QR_Code">
+      <img src="qrcode.jpg" alt="QR코드">
+    </div>
+
+    <progress value="30" max="30" id="jb"></progress>
+    <p class="progressbar_time" id="progress-text">30초</p>
+    <p style="font-size: 10pt; color: gray;">QR코드를 리더기에 스캔하세요</p>
+    <p id="current-time" style="font-size: 10pt; color: gray;"></p>
+
+    <div class="box_footer js-click-modal">상세정보 표시</div>
+  </div>
+
+  <!-- 상세정보 모달 -->
+  <div class="modal">
+    <img src="facephoto.jpg" style="width:140px; height:175px;">
+    <h1>최준영</h1>
+    <h2>051017-<span id="idNumber">*******</span></h2>
+    <h3>부산광역시 북구 <span id="userLocation">ㅤ<br>ㅤ</span></h3>
+    <p>발급일자: 2022.11.26</p>
+    <p style="font-weight: bold;">부산광역시 북구청장</p>
+
+    <div style="margin-top: 15px;">
+      <input type="checkbox" id="switch" hidden onchange="updateText()">
+      <label for="switch" class="switch_label">
+        <span class="onf_btn"></span>
+      </label>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <button class="back">돌아가기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 시간 표시
+  function updateTime() {
+    const now = new Date();
+    const formatted = `${now.getFullYear()}년${(now.getMonth() + 1).toString().padStart(2, '0')}월${now.getDate().toString().padStart(2, '0')}일 ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+    document.getElementById("current-time").innerText = formatted;
+  }
+  updateTime();
+  setInterval(updateTime, 1000);
+
+  // 모달 토글
+  document.querySelector('.js-click-modal').onclick = () => {
+    document.querySelector('.box_main').style.display = 'none';
+    document.querySelector('.modal').style.display = 'block';
+  };
+  document.querySelector('.back').onclick = () => {
+    document.querySelector('.modal').style.display = 'none';
+    document.querySelector('.box_main').style.display = 'block';
+  };
+
+  // 남은 시간 표시
+  let count = 30;
+  setInterval(() => {
+    document.getElementById('progress-text').innerText = `${count}초`;
+    document.querySelector('#jb').value = count;
+    count--;
+    if (count <= 0) count = 30;
+  }, 1000);
+
+  // 체크박스로 내용 보이기
+  function updateText() {
+    const checkbox = document.getElementById("switch");
+    const idNumber = document.getElementById("idNumber");
+    const userLocation = document.getElementById("userLocation");
+
+    if (checkbox.checked) {
+      idNumber.innerText = "3113611";
+      userLocation.innerHTML = "만덕1로 8 <br>101동 806호 (만덕동, 만덕베르빌아파트)";
+    } else {
+      idNumber.innerText = "*******";
+      userLocation.innerHTML = "ㅤ<br>ㅤ";
+    }
+  }
+
+  // 로딩화면 제거
+  setTimeout(() => {
+    document.getElementById("loading-screen").style.display = "none";
+  }, 1500);
+</script>
+</body>
+</html>
